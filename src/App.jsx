@@ -228,33 +228,36 @@ function ExcelImporter({onImport}){
 
 /* ─── L4 ANALYSIS ─────────────────────────────────────────────── */
 async function runL4Analysis(suppliers,category,apiKey){
-  const sup_list=suppliers.map(s=>`${s.name} (${s.country}, ${s.tier}, ${s.product})`).join('\n')
-  const prompt=`You are a tier-4 supply chain risk analyst specializing in industrial and defence procurement.
+  const sup_list=suppliers.slice(0,8).map(s=>`${s.name} (${s.country}, ${s.tier}, ${s.product})`).join('\n')
+  const prompt = `You are a supply chain risk analyst. Analyze this supplier list and identify risks down to Tier 4. Reply with ONLY strictly valid JSON, no markdown, no explanation, no extra text before or after.
 
-Analyze this supplier list and extrapolate hidden sub-supplier risks down to Tier 4 (L4):
+Suppliers:
 ${sup_list}
-${category?`Category focus: ${category}`:''}
 
-Reply ONLY with valid JSON (no markdown, no preamble):
+Required JSON format:
 {
-  "summary": "2-sentence executive summary of main vulnerabilities",
+  "summary": "2 sentences describing main vulnerabilities",
+  "overall_score": 75,
   "critical_paths": [
     {
-      "chain": ["T1 Supplier","T2","T3","T4 inferred"],
-      "material": "critical material",
-      "country_concentration": "country",
+      "chain": ["T1 name", "T2 name", "T3 inferred", "T4 inferred"],
+      "material": "material name",
+      "country_concentration": "China",
       "pct": 85,
-      "risk_score": 0,
-      "bottleneck": "specific vulnerability at L4",
-      "mitigation": "concrete action"
+      "risk_score": 82,
+      "bottleneck": "specific vulnerability at T4",
+      "mitigation": "concrete recommended action"
     }
   ],
   "geographic_clusters": [
-    {"country": "China", "exposure_pct": 72, "categories": ["Rare earths","Magnets"]}
+    {
+      "country": "China",
+      "exposure_pct": 70,
+      "categories": ["Rare earths", "Magnets"]
+    }
   ],
-  "single_source_alerts": ["supplier name: reason"],
-  "strategic_actions": ["action 1","action 2","action 3"],
-  "overall_score": 0
+  "single_source_alerts": ["Supplier name: reason for sole source risk"],
+  "strategic_actions": ["Action 1", "Action 2", "Action 3"]
 }`
   const txt=await geminiCall(apiKey,prompt)
   const cleaned = txt.substring(txt.indexOf('{'), txt.lastIndexOf('}') + 1)
