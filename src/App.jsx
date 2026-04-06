@@ -257,7 +257,8 @@ Reply ONLY with valid JSON (no markdown, no preamble):
   "overall_score": 0
 }`
   const txt=await geminiCall(apiKey,prompt)
-  return JSON.parse(txt)
+  const cleaned = txt.substring(txt.indexOf('{'), txt.lastIndexOf('}') + 1)
+return JSON.parse(cleaned)
 }
 
 /* ─── DEMO DATA ─────────────────────────────────────────────── */
